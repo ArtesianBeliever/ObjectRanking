@@ -10,6 +10,7 @@ using ObjectRanking.Interfaces;
 using ObjectRanking.Models;
 using ObjectRanking.Models.Dto;
 using ObjectRanking.Models.Entities;
+using ObjectRanking.Services;
 
 namespace ObjectRanking.Controllers;
 
@@ -17,88 +18,39 @@ namespace ObjectRanking.Controllers;
 [ApiController]
 public class LoginController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    
-    private IConfiguration _config;
-    
-    private IHttpContextAccessor _httpContext;
     private IPasswordHasher _passwordHasher { get; }
+    private ITokenService _tokenService;
+    private IUserService _userService;
    
-    public LoginController(ApplicationDbContext dbContext, IConfiguration config, IPasswordHasher passwordHasher
-    , IHttpContextAccessor  httpContext)
+    public LoginController(IPasswordHasher passwordHasher
+    , ITokenService tokenService, IUserService userService)
     {
-        _config = config;
-        _context = dbContext;
         _passwordHasher = passwordHasher;
-        _httpContext = httpContext;
+        _tokenService = tokenService;
+        _userService = userService;
     }
 
     [AllowAnonymous]
-    [HttpPost]
-    public IActionResult Login(LoginRequest loginRequest)
+    [HttpPost(Name = "Login")]
+    public async Task<IActionResult> Login(LoginRequest loginRequest)
     {
-        var user = Authenticate(loginRequest);
+        var user = await _userService.Authenticate(loginRequest);
 
         if (user != null)
         {
-            var token = Generate(user);
+            var token = _tokenService.Generate(user);
             HttpContext.Response.Cookies.Append("Token", token);
             return Ok(token);
         }
         return NotFound("User not found");
     }
-
-    [AllowAnonymous]
-    [HttpGet]
-    public IActionResult GetPassword(string password)
-    {
-        return Ok(_passwordHasher.Generate(password));
-    }
     
-    [HttpPut]
+    
+    [HttpPost("Register")]
     public async Task<IActionResult> Register(UserDto dto)
     {
-        var newUser = new ApplicationUser()
-        {
-            Id = Guid.NewGuid(),
-            Email = dto.Email,
-            PasswordHash = _passwordHasher.Generate(dto.Password),
-            Name = dto.Name,
-        };
-        _context.ApplicationUsers.Add(newUser);
-        await _context.SaveChangesAsync();
+        var newUser = await _userService.Register(dto);
         return Ok(newUser);
     }
-    private ApplicationUser Authenticate(LoginRequest loginRequest)
-    {
-        var currentUser = _context.ApplicationUsers.FirstOrDefault(u 
-            => u.Email.ToLower() == loginRequest.Email.ToLower());
-        
-        if (currentUser != null)
-        {
-            var verify = _passwordHasher.Verify(loginRequest.Password, currentUser.PasswordHash);
-            if (verify)
-            {
-                return currentUser;
-            }
-        }
-        return null;
-    }
-    
-    private string Generate(ApplicationUser user)
-    {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtOptions:SecretKey"]));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var claims = new Claim[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Name),
-            new Claim(ClaimTypes.Email, user.Email),
-        };
-        var token = new JwtSecurityToken(_config["JwtOptions:Issuer"],
-            _config["JwtOptions:Audience"],
-            claims,
-            expires: DateTime.Now.AddHours(Int32.Parse(_config["JwtOptions:ExpiresHours"])),
-            signingCredentials: credentials);
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+
 }

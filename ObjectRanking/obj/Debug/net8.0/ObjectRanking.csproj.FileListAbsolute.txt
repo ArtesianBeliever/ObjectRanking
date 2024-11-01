@@ -144,3 +144,4 @@ C:\Users\USER\RiderProjects\ObjectRanking\ObjectRanking\obj\Debug\net8.0\ObjectR
 C:\Users\USER\RiderProjects\ObjectRanking\ObjectRanking\obj\Debug\net8.0\ObjectRanking.genruntimeconfig.cache
 C:\Users\USER\RiderProjects\ObjectRanking\ObjectRanking\obj\Debug\net8.0\ref\ObjectRanking.dll
 C:\Users\USER\RiderProjects\ObjectRanking\ObjectRanking\bin\Debug\net8.0\Microsoft.Bcl.TimeProvider.dll
+C:\Users\USER\RiderProjects\ObjectRanking\ObjectRanking\obj\Debug\net8.0\ObjectRanking.sourcelink.json

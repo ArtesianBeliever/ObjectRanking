@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using ObjectRanking;
 using ObjectRanking.Data;
 using ObjectRanking.Interfaces;
+using ObjectRanking.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,8 +42,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
     };
 });
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddTransient<ITestService, TestService>();
+builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 builder.Services.AddMvc();
 

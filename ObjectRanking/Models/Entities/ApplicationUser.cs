@@ -1,4 +1,6 @@
-﻿namespace ObjectRanking.Models.Entities;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace ObjectRanking.Models.Entities;
 
 public class ApplicationUser
 {
@@ -7,5 +9,6 @@ public class ApplicationUser
     public required string Email { get; set; }
     public required string PasswordHash { get; set; }
     
-    //public ICollection<UserSurvey> UserSurveys { get; set; } = new List<UserSurvey>();
+    [ValidateNever]
+    public ICollection<UserSurvey> UserSurveys { get; set; } = new List<UserSurvey>();
 }

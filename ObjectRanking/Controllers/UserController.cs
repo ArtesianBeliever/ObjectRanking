@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ObjectRanking.Data;
+using ObjectRanking.Interfaces;
 using ObjectRanking.Models.Entities;
 using ObjectRanking.Services;
 
@@ -12,10 +13,12 @@ namespace ObjectRanking.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IUserService _userService;
     
-    public UserController(ApplicationDbContext context)
+    public UserController(ApplicationDbContext context, IUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     [HttpGet]
@@ -28,9 +31,10 @@ public class UserController : ControllerBase
     [Authorize]
     public IActionResult Private()
     {
-        var curentUser = GetCurrentUser();
+        var identity = HttpContext.User.Identity as ClaimsIdentity;
+        var currentUser = _userService.GetCurrentUser(identity);
         
-        return Ok(curentUser);
+        return Ok(currentUser);
     }
     [ApiExplorerSettings(IgnoreApi = true)]
     private ApplicationUser GetCurrentUser()

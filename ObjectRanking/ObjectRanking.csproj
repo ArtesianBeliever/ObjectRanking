@@ -27,4 +27,9 @@
       <Folder Include="Repositories\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Controllers\AbobaController.cs" />
+      <Compile Remove="Controllers\TestController.cs" />
+    </ItemGroup>
+
 </Project>
